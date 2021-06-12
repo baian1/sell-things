@@ -18,7 +18,8 @@ import { useCallback } from "react";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "300px",
-    flex: 1,
+    position: "sticky",
+    top: "0px",
     maxWidth: 360,
     backgroundColor: "#1d0c4c",
   },
@@ -180,7 +181,7 @@ const Menu: React.FC<{}> = () => {
         );
       });
     },
-    [changeOpen, classes.nested]
+    [changeOpen, classes.icon, classes.item, classes.nested, classes.text]
   );
 
   return (
@@ -193,11 +194,6 @@ const Menu: React.FC<{}> = () => {
       <List
         component="nav"
         aria-labelledby="nested-list-subheader"
-        subheader={
-          <ListSubheader component="div" id="nested-list-subheader">
-            菜单
-          </ListSubheader>
-        }
         className={classes.root}
       >
         {renderList(menuData)}
