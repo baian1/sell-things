@@ -15,7 +15,6 @@ const Home: React.FC<{}> = () => {
       <Header></Header>
       <div
         style={{
-          backgroundColor: "violet",
           flex: 1,
           display: "flex",
           flexDirection: "row",
@@ -26,12 +25,12 @@ const Home: React.FC<{}> = () => {
         <div
           style={{
             flex: 1,
+            backgroundColor: "tomato",
           }}
         ></div>
         <div
           style={{
             padding: "0 20px",
-            backgroundColor: "whitesmoke",
           }}
         >
           <CardList />
