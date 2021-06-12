@@ -1,4 +1,5 @@
 import React from "react";
+import { CardList } from "../component/CardList";
 import { Header } from "../component/Header";
 import { Menu } from "../component/Menu";
 const Home: React.FC<{}> = () => {
@@ -22,6 +23,19 @@ const Home: React.FC<{}> = () => {
         }}
       >
         <Menu />
+        <div
+          style={{
+            flex: 1,
+          }}
+        ></div>
+        <div
+          style={{
+            padding: "0 20px",
+            backgroundColor: "whitesmoke",
+          }}
+        >
+          <CardList />
+        </div>
       </div>
     </div>
   );

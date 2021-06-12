@@ -13,13 +13,23 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import StarBorder from "@material-ui/icons/StarBorder";
 import { useState } from "react";
+import { useCallback } from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "300px",
     flex: 1,
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: "#1d0c4c",
+  },
+  item: {
+    borderBottom: "3px solid white",
+  },
+  icon: {
+    color: "white",
+  },
+  text: {
+    color: "white",
   },
   nested: {
     paddingLeft: theme.spacing(4),
@@ -56,24 +66,122 @@ const menuinitData: MenuData[] = [
     title: "Inbox",
     icon: <InboxIcon />,
     open: OpenStatus.OPEN,
+    children: [
+      {
+        title: "Starred",
+        icon: <StarBorder />,
+        open: OpenStatus.CLOSE,
+        children: [
+          {
+            title: "Starred11",
+            icon: <StarBorder />,
+            open: OpenStatus.EMPTY,
+          },
+        ],
+      },
+    ],
   },
 ];
+
 const Menu: React.FC<{}> = () => {
   const classes = useStyles();
   const [menuData, setmenuData] = useState(menuinitData);
-  const [open, setOpen] = React.useState(true);
 
-  //     <ListItem button onClick={handleClick}>
-  //     <ListItemIcon>
-  //       <InboxIcon />
-  //     </ListItemIcon>
-  //     <ListItemText primary="Inbox" />
-  //     {open ? <ExpandLess /> : <ExpandMore />}
-  //   </ListItem>
+  /**
+   * 控制菜单的展开与关闭
+   */
+  const changeOpen = useCallback((nodeTrace: number[]) => {
+    setmenuData((oldMenuData) => {
+      const newMenuData = [...oldMenuData];
+      const firstIndex = nodeTrace[0];
+      nodeTrace.shift();
+      let current: MenuData = newMenuData[firstIndex];
+      for (let index of nodeTrace) {
+        if (!current.children) {
+          break;
+        }
+        current = current.children[index];
+      }
+      if (current.open === OpenStatus.OPEN) {
+        current.open = OpenStatus.CLOSE;
+      } else if (current.open === OpenStatus.CLOSE) {
+        current.open = OpenStatus.OPEN;
+      }
+      return newMenuData;
+    });
+  }, []);
 
-  const handleClick = () => {
-    setOpen(!open);
-  };
+  const renderList: (
+    menuData: MenuData[],
+    parentList?: number[]
+  ) => JSX.Element[] = useCallback(
+    (menuData: MenuData[], parentList: number[] = []) => {
+      return menuData.map((item, index) => {
+        let rightIcon = <></>;
+        switch (item.open) {
+          case OpenStatus.OPEN: {
+            rightIcon = <ExpandLess className={classes.icon} />;
+            break;
+          }
+          case OpenStatus.CLOSE: {
+            rightIcon = <ExpandMore className={classes.icon} />;
+            break;
+          }
+          default:
+        }
+        let children: JSX.Element[] | null = null;
+        if (item.children) {
+          children = renderList(item.children, [...parentList, index]);
+        }
+
+        let className = "";
+        switch (parentList.length) {
+          case 0: {
+            className = "";
+            break;
+          }
+          case 1: {
+            className = classes.nested;
+            break;
+          }
+          case 2: {
+            //可以根据长度来控制缩进等样式
+            className = classes.nested;
+            break;
+          }
+          default:
+        }
+        return (
+          <>
+            <ListItem
+              button
+              className={`${className} ${classes.item}`}
+              onClick={() => {
+                const nodeTrace = [...parentList, index];
+                changeOpen(nodeTrace);
+              }}
+            >
+              <ListItemIcon className={classes.icon}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.title} className={classes.text} />
+              {rightIcon}
+            </ListItem>
+            {children && item.open === OpenStatus.OPEN ? (
+              <Collapse
+                in={item.open === OpenStatus.OPEN}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {children}
+                </List>
+              </Collapse>
+            ) : null}
+          </>
+        );
+      });
+    },
+    [changeOpen, classes.nested]
+  );
 
   return (
     <div
@@ -92,56 +200,7 @@ const Menu: React.FC<{}> = () => {
         }
         className={classes.root}
       >
-        {menuData.map((item) => {
-          let rightIcon = <></>;
-          switch (item.open) {
-            case OpenStatus.OPEN: {
-              rightIcon = <ExpandLess />;
-              break;
-            }
-            case OpenStatus.CLOSE: {
-              rightIcon = <ExpandMore />;
-              break;
-            }
-            default:
-          }
-          return (
-            <ListItem button>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.title} />
-              {rightIcon}
-            </ListItem>
-          );
-        })}
-        <ListItem button>
-          <ListItemIcon>
-            <SendIcon />
-          </ListItemIcon>
-          <ListItemText primary="Sent mail" />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <DraftsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Drafts" />
-        </ListItem>
-        <ListItem button onClick={handleClick}>
-          <ListItemIcon>
-            <InboxIcon />
-          </ListItemIcon>
-          <ListItemText primary="Inbox" />
-          {open ? <ExpandLess /> : <ExpandMore />}
-        </ListItem>
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItem button className={classes.nested}>
-              <ListItemIcon>
-                <StarBorder />
-              </ListItemIcon>
-              <ListItemText primary="Starred" />
-            </ListItem>
-          </List>
-        </Collapse>
+        {renderList(menuData)}
       </List>
     </div>
   );
