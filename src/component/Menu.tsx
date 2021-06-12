@@ -12,6 +12,7 @@ import SendIcon from "@material-ui/icons/Send";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import StarBorder from "@material-ui/icons/StarBorder";
+import { useState } from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,17 +26,50 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface MenuData {
-  title: string;
-  onClick: () => void;
-  children: MenuData[];
+enum OpenStatus {
+  EMPTY,
+  OPEN,
+  CLOSE,
 }
 
+interface MenuData {
+  title: string;
+  onClick?: () => void;
+  children?: MenuData[];
+  icon: JSX.Element;
+  open: OpenStatus;
+}
+
+//初始化的数据
+const menuinitData: MenuData[] = [
+  {
+    title: "Sent mail",
+    icon: <SendIcon />,
+    open: OpenStatus.EMPTY,
+  },
+  {
+    title: "Drafts",
+    icon: <DraftsIcon />,
+    open: OpenStatus.EMPTY,
+  },
+  {
+    title: "Inbox",
+    icon: <InboxIcon />,
+    open: OpenStatus.OPEN,
+  },
+];
 const Menu: React.FC<{}> = () => {
   const classes = useStyles();
+  const [menuData, setmenuData] = useState(menuinitData);
   const [open, setOpen] = React.useState(true);
 
-  const menuData: MenuData[] = [];
+  //     <ListItem button onClick={handleClick}>
+  //     <ListItemIcon>
+  //       <InboxIcon />
+  //     </ListItemIcon>
+  //     <ListItemText primary="Inbox" />
+  //     {open ? <ExpandLess /> : <ExpandMore />}
+  //   </ListItem>
 
   const handleClick = () => {
     setOpen(!open);
@@ -58,6 +92,27 @@ const Menu: React.FC<{}> = () => {
         }
         className={classes.root}
       >
+        {menuData.map((item) => {
+          let rightIcon = <></>;
+          switch (item.open) {
+            case OpenStatus.OPEN: {
+              rightIcon = <ExpandLess />;
+              break;
+            }
+            case OpenStatus.CLOSE: {
+              rightIcon = <ExpandMore />;
+              break;
+            }
+            default:
+          }
+          return (
+            <ListItem button>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.title} />
+              {rightIcon}
+            </ListItem>
+          );
+        })}
         <ListItem button>
           <ListItemIcon>
             <SendIcon />
