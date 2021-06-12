@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: "300px",
     position: "sticky",
+    height: "100vh",
     top: "0px",
     maxWidth: 360,
     backgroundColor: "#1d0c4c",
